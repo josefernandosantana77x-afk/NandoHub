@@ -1,16 +1,11 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
-local old = player.PlayerGui:FindFirstChild("NandoHub")
+local old = playerGui:FindFirstChild("NandoHub")
 if old then
     old:Destroy()
 end
-
-local gui = Instance.new("ScreenGui")
-gui.Name = "NandoHub"
-gui.ResetOnSpawn = false
-gui.DisplayOrder = 999
-gui.Parent = player:WaitForChild("PlayerGui")
 
 local purple = Color3.fromRGB(160, 75, 255)
 local dark = Color3.fromRGB(17, 15, 25)
@@ -32,17 +27,28 @@ local function outline(obj, color, thickness)
     s.Parent = obj
 end
 
+local gui = Instance.new("ScreenGui")
+gui.Name = "NandoHub"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 999
+gui.Parent = playerGui
+
 local main = Instance.new("Frame")
 main.Name = "Main"
-main.Size = UDim2.new(0, 290, 0, 235)
-main.Position = UDim2.new(0.5, -145, 0.5, -117)
+main.Size = UDim2.new(0, 290, 0, 250)
+main.Position = UDim2.new(0.5, -145, 0.5, -125)
 main.BackgroundColor3 = dark
 main.BorderSizePixel = 0
 main.Parent = gui
 round(main, 14)
 outline(main, purple, 1.5)
 
+-- Arrastar o painel com o dedo
+local drag = Instance.new("UIDragDetector")
+drag.Parent = main
+
 local top = Instance.new("Frame")
+top.Name = "Top"
 top.Size = UDim2.new(1, 0, 0, 68)
 top.BackgroundColor3 = card
 top.BorderSizePixel = 0
@@ -51,7 +57,7 @@ round(top, 14)
 
 local title = Instance.new("TextLabel")
 title.Position = UDim2.fromOffset(15, 8)
-title.Size = UDim2.new(1, -30, 0, 30)
+title.Size = UDim2.new(1, -65, 0, 30)
 title.BackgroundTransparency = 1
 title.Text = "⚡ NANDO HUB"
 title.TextColor3 = white
@@ -64,47 +70,126 @@ local subtitle = Instance.new("TextLabel")
 subtitle.Position = UDim2.fromOffset(17, 39)
 subtitle.Size = UDim2.new(1, -34, 0, 18)
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "PROJECT DELTA  •  VERSION 2"
+subtitle.Text = "VERSION 3 • MOBILE"
 subtitle.TextColor3 = purple
 subtitle.Font = Enum.Font.GothamMedium
 subtitle.TextSize = 10
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.Parent = top
 
+-- Minimizar / restaurar
+local minimize = Instance.new("TextButton")
+minimize.Size = UDim2.fromOffset(30, 30)
+minimize.Position = UDim2.new(1, -40, 0, 10)
+minimize.BackgroundColor3 = dark
+minimize.Text = "−"
+minimize.TextColor3 = white
+minimize.TextSize = 22
+minimize.Font = Enum.Font.GothamBold
+minimize.Parent = top
+round(minimize, 8)
+
+local content = Instance.new("Frame")
+content.Name = "Content"
+content.Position = UDim2.fromOffset(10, 76)
+content.Size = UDim2.new(1, -20, 1, -86)
+content.BackgroundTransparency = 1
+content.Parent = main
+
+local tabBar = Instance.new("Frame")
+tabBar.Size = UDim2.new(1, 0, 0, 34)
+tabBar.BackgroundTransparency = 1
+tabBar.Parent = content
+
+local function makeTab(name, x)
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(0.333, -4, 1, 0)
+    b.Position = UDim2.new(x, 0, 0, 0)
+    b.BackgroundColor3 = card
+    b.Text = name
+    b.TextColor3 = white
+    b.TextSize = 11
+    b.Font = Enum.Font.GothamBold
+    b.Parent = tabBar
+    round(b, 7)
+    return b
+end
+
+local homeTab = makeTab("INICIO", 0)
+local optionsTab = makeTab("OPCOES", 0.333)
+local infoTab = makeTab("INFO", 0.666)
+
+local page = Instance.new("Frame")
+page.Position = UDim2.fromOffset(0, 42)
+page.Size = UDim2.new(1, 0, 1, -42)
+page.BackgroundColor3 = card
+page.BorderSizePixel = 0
+page.Parent = content
+round(page, 9)
+
 local status = Instance.new("TextLabel")
-status.Position = UDim2.fromOffset(15, 82)
-status.Size = UDim2.new(1, -30, 0, 38)
-status.BackgroundColor3 = card
-status.Text = "  ✦  Nando Hub iniciado!"
+status.Position = UDim2.fromOffset(8, 8)
+status.Size = UDim2.new(1, -16, 0, 36)
+status.BackgroundTransparency = 1
+status.Text = "Nando Hub iniciado!"
 status.TextColor3 = white
+status.TextSize = 12
 status.Font = Enum.Font.Gotham
-status.TextSize = 13
-status.TextXAlignment = Enum.TextXAlignment.Left
-status.Parent = main
-round(status, 8)
+status.TextWrapped = true
+status.Parent = page
 
-local button = Instance.new("TextButton")
-button.Position = UDim2.fromOffset(15, 132)
-button.Size = UDim2.new(1, -30, 0, 42)
-button.BackgroundColor3 = purple
-button.Text = "TESTAR PAINEL"
-button.TextColor3 = white
-button.Font = Enum.Font.GothamBold
-button.TextSize = 14
-button.AutoButtonColor = true
-button.Parent = main
-round(button, 9)
+local testButton = Instance.new("TextButton")
+testButton.Position = UDim2.fromOffset(8, 48)
+testButton.Size = UDim2.new(1, -16, 0, 34)
+testButton.BackgroundColor3 = purple
+testButton.Text = "TESTAR PAINEL"
+testButton.TextColor3 = white
+testButton.TextSize = 12
+testButton.Font = Enum.Font.GothamBold
+testButton.Parent = page
+round(testButton, 8)
 
-button.Activated:Connect(function()
-    status.Text = "  ✓  Interface funcionando!"
+local minimized = false
+minimize.Activated:Connect(function()
+    minimized = not minimized
+    content.Visible = not minimized
+    main.Size = minimized
+        and UDim2.new(0, 290, 0, 68)
+        or UDim2.new(0, 290, 0, 250)
+    minimize.Text = minimized and "+" or "−"
 end)
 
-local footer = Instance.new("TextLabel")
-footer.Position = UDim2.new(0, 0, 1, -26)
-footer.Size = UDim2.new(1, 0, 0, 18)
-footer.BackgroundTransparency = 1
-footer.Text = "NANDO HUB  •  MOBILE"
-footer.TextColor3 = muted
-footer.Font = Enum.Font.Gotham
-footer.TextSize = 10
-footer.Parent = main
+testButton.Activated:Connect(function()
+    status.Text = "Interface funcionando!"
+end)
+
+local function showPage(name)
+    if name == "INICIO" then
+        status.Text = "Bem-vindo ao NANDO HUB!"
+        testButton.Visible = true
+    elseif name == "OPCOES" then
+        status.Text = "Opcoes da interface"
+        testButton.Visible = false
+    else
+        status.Text = "NANDO HUB V3 | Mobile"
+        testButton.Visible = false
+    end
+
+    homeTab.BackgroundColor3 = name == "INICIO" and purple or card
+    optionsTab.BackgroundColor3 = name == "OPCOES" and purple or card
+    infoTab.BackgroundColor3 = name == "INFO" and purple or card
+end
+
+homeTab.Activated:Connect(function()
+    showPage("INICIO")
+end)
+
+optionsTab.Activated:Connect(function()
+    showPage("OPCOES")
+end)
+
+infoTab.Activated:Connect(function()
+    showPage("INFO")
+end)
+
+showPage("INICIO")
