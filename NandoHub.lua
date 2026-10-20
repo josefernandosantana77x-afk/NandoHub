@@ -1,4 +1,3 @@
-
 -- NANDO HUB V5 | VAMPIRE LIFE EDITION
 -- Interface profissional para Roblox Studio
 -- LocalScript em StarterPlayerScripts
