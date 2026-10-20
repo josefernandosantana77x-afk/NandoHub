@@ -1,11 +1,14 @@
+
+-- NANDO HUB V3
+-- Interface para seu proprio jogo Roblox
+-- LocalScript em StarterPlayerScripts
+
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 local old = playerGui:FindFirstChild("NandoHub")
-if old then
-    old:Destroy()
-end
+if old then old:Destroy() end
 
 local purple = Color3.fromRGB(160, 75, 255)
 local dark = Color3.fromRGB(17, 15, 25)
@@ -19,10 +22,10 @@ local function round(obj, radius)
     c.Parent = obj
 end
 
-local function outline(obj, color, thickness)
+local function outline(obj)
     local s = Instance.new("UIStroke")
-    s.Color = color
-    s.Thickness = thickness or 1
+    s.Color = purple
+    s.Thickness = 1.5
     s.Transparency = 0.15
     s.Parent = obj
 end
@@ -35,20 +38,19 @@ gui.Parent = playerGui
 
 local main = Instance.new("Frame")
 main.Name = "Main"
-main.Size = UDim2.new(0, 290, 0, 250)
+main.Size = UDim2.fromOffset(290, 250)
 main.Position = UDim2.new(0.5, -145, 0.5, -125)
 main.BackgroundColor3 = dark
 main.BorderSizePixel = 0
 main.Parent = gui
 round(main, 14)
-outline(main, purple, 1.5)
+outline(main)
 
--- Arrastar o painel com o dedo
+-- Arrastar painel
 local drag = Instance.new("UIDragDetector")
 drag.Parent = main
 
 local top = Instance.new("Frame")
-top.Name = "Top"
 top.Size = UDim2.new(1, 0, 0, 68)
 top.BackgroundColor3 = card
 top.BorderSizePixel = 0
@@ -56,19 +58,19 @@ top.Parent = main
 round(top, 14)
 
 local title = Instance.new("TextLabel")
-title.Position = UDim2.fromOffset(15, 8)
-title.Size = UDim2.new(1, -65, 0, 30)
+title.Position = UDim2.fromOffset(12, 7)
+title.Size = UDim2.new(1, -58, 0, 30)
 title.BackgroundTransparency = 1
 title.Text = "⚡ NANDO HUB"
 title.TextColor3 = white
 title.Font = Enum.Font.GothamBold
-title.TextSize = 22
+title.TextSize = 21
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = top
 
 local subtitle = Instance.new("TextLabel")
-subtitle.Position = UDim2.fromOffset(17, 39)
-subtitle.Size = UDim2.new(1, -34, 0, 18)
+subtitle.Position = UDim2.fromOffset(14, 39)
+subtitle.Size = UDim2.new(1, -25, 0, 18)
 subtitle.BackgroundTransparency = 1
 subtitle.Text = "VERSION 3 • MOBILE"
 subtitle.TextColor3 = purple
@@ -77,10 +79,9 @@ subtitle.TextSize = 10
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.Parent = top
 
--- Minimizar / restaurar
 local minimize = Instance.new("TextButton")
 minimize.Size = UDim2.fromOffset(30, 30)
-minimize.Position = UDim2.new(1, -40, 0, 10)
+minimize.Position = UDim2.new(1, -38, 0, 10)
 minimize.BackgroundColor3 = dark
 minimize.Text = "−"
 minimize.TextColor3 = white
@@ -90,7 +91,6 @@ minimize.Parent = top
 round(minimize, 8)
 
 local content = Instance.new("Frame")
-content.Name = "Content"
 content.Position = UDim2.fromOffset(10, 76)
 content.Size = UDim2.new(1, -20, 1, -86)
 content.BackgroundTransparency = 1
@@ -150,12 +150,13 @@ testButton.Parent = page
 round(testButton, 8)
 
 local minimized = false
+
 minimize.Activated:Connect(function()
     minimized = not minimized
     content.Visible = not minimized
     main.Size = minimized
-        and UDim2.new(0, 290, 0, 68)
-        or UDim2.new(0, 290, 0, 250)
+        and UDim2.fromOffset(290, 68)
+        or UDim2.fromOffset(290, 250)
     minimize.Text = minimized and "+" or "−"
 end)
 
@@ -175,9 +176,12 @@ local function showPage(name)
         testButton.Visible = false
     end
 
-    homeTab.BackgroundColor3 = name == "INICIO" and purple or card
-    optionsTab.BackgroundColor3 = name == "OPCOES" and purple or card
-    infoTab.BackgroundColor3 = name == "INFO" and purple or card
+    homeTab.BackgroundColor3 =
+        name == "INICIO" and purple or card
+    optionsTab.BackgroundColor3 =
+        name == "OPCOES" and purple or card
+    infoTab.BackgroundColor3 =
+        name == "INFO" and purple or card
 end
 
 homeTab.Activated:Connect(function()
