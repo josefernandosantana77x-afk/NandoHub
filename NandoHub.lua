@@ -1,199 +1,365 @@
-
--- NANDO HUB V3
--- Interface para seu proprio jogo Roblox
--- LocalScript em StarterPlayerScripts
+-- NANDO HUB V4
+-- Interface visual para seu proprio jogo no Roblox Studio.
+-- Instale como LocalScript em StarterPlayer > StarterPlayerScripts.
 
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
-local old = playerGui:FindFirstChild("NandoHub")
-if old then old:Destroy() end
-
-local purple = Color3.fromRGB(160, 75, 255)
-local dark = Color3.fromRGB(17, 15, 25)
-local card = Color3.fromRGB(29, 24, 40)
-local white = Color3.fromRGB(245, 240, 255)
-local muted = Color3.fromRGB(175, 162, 195)
-
-local function round(obj, radius)
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, radius)
-    c.Parent = obj
+local oldGui = playerGui:FindFirstChild("NandoHubV4")
+if oldGui then
+    oldGui:Destroy()
 end
 
-local function outline(obj)
-    local s = Instance.new("UIStroke")
-    s.Color = purple
-    s.Thickness = 1.5
-    s.Transparency = 0.15
-    s.Parent = obj
-end
+local COLORS = {
+    Purple = Color3.fromRGB(145, 55, 255),
+    Pink = Color3.fromRGB(255, 55, 210),
+    Blue = Color3.fromRGB(55, 170, 255),
+    Green = Color3.fromRGB(60, 255, 170),
+}
+
+local accentNames = {"Roxo", "Rosa", "Azul", "Verde"}
+local accentKeys = {"Purple", "Pink", "Blue", "Green"}
+local accentIndex = 1
+local scaleIndex = 2
+local scales = {
+    {name = "Pequeno", size = UDim2.fromOffset(330, 245)},
+    {name = "Médio", size = UDim2.fromOffset(380, 285)},
+    {name = "Grande", size = UDim2.fromOffset(430, 325)},
+}
+
+local accent = COLORS[accentKeys[accentIndex]]
+local minimized = false
+local currentTab = "INICIO"
 
 local gui = Instance.new("ScreenGui")
-gui.Name = "NandoHub"
+gui.Name = "NandoHubV4"
 gui.ResetOnSpawn = false
-gui.DisplayOrder = 999
+gui.IgnoreGuiInset = true
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = playerGui
 
-local main = Instance.new("Frame")
-main.Name = "Main"
-main.Size = UDim2.fromOffset(290, 250)
-main.Position = UDim2.new(0.5, -145, 0.5, -125)
-main.BackgroundColor3 = dark
-main.BorderSizePixel = 0
-main.Parent = gui
-round(main, 14)
-outline(main)
+local root = Instance.new("Frame")
+root.Name = "Main"
+root.AnchorPoint = Vector2.new(0.5, 0.5)
+root.Position = UDim2.fromScale(0.5, 0.5)
+root.Size = scales[scaleIndex].size
+root.BackgroundColor3 = Color3.fromRGB(15, 12, 24)
+root.BorderSizePixel = 0
+root.ClipsDescendants = true
+root.Parent = gui
 
--- Arrastar painel
-local drag = Instance.new("UIDragDetector")
-drag.Parent = main
+local rootCorner = Instance.new("UICorner")
+rootCorner.CornerRadius = UDim.new(0, 12)
+rootCorner.Parent = root
 
-local top = Instance.new("Frame")
-top.Size = UDim2.new(1, 0, 0, 68)
-top.BackgroundColor3 = card
-top.BorderSizePixel = 0
-top.Parent = main
-round(top, 14)
+local rootStroke = Instance.new("UIStroke")
+rootStroke.Color = accent
+rootStroke.Thickness = 2
+rootStroke.Parent = root
+
+local rootScale = Instance.new("UIScale")
+rootScale.Scale = 0.88
+rootScale.Parent = root
+
+local header = Instance.new("Frame")
+header.Name = "Header"
+header.Size = UDim2.new(1, 0, 0, 48)
+header.BackgroundColor3 = Color3.fromRGB(25, 18, 39)
+header.BorderSizePixel = 0
+header.Parent = root
 
 local title = Instance.new("TextLabel")
-title.Position = UDim2.fromOffset(12, 7)
-title.Size = UDim2.new(1, -58, 0, 30)
+title.Name = "Title"
 title.BackgroundTransparency = 1
-title.Text = "⚡ NANDO HUB"
-title.TextColor3 = white
+title.Position = UDim2.fromOffset(14, 0)
+title.Size = UDim2.new(1, -110, 1, 0)
 title.Font = Enum.Font.GothamBold
-title.TextSize = 21
+title.Text = "NANDO HUB  V4"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 17
 title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = top
+title.Parent = header
 
-local subtitle = Instance.new("TextLabel")
-subtitle.Position = UDim2.fromOffset(14, 39)
-subtitle.Size = UDim2.new(1, -25, 0, 18)
-subtitle.BackgroundTransparency = 1
-subtitle.Text = "VERSION 3 • MOBILE"
-subtitle.TextColor3 = purple
-subtitle.Font = Enum.Font.GothamMedium
-subtitle.TextSize = 10
-subtitle.TextXAlignment = Enum.TextXAlignment.Left
-subtitle.Parent = top
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Name = "Minimize"
+minimizeButton.Size = UDim2.fromOffset(34, 30)
+minimizeButton.Position = UDim2.new(1, -43, 0, 9)
+minimizeButton.BackgroundColor3 = accent
+minimizeButton.Text = "—"
+minimizeButton.TextColor3 = Color3.new(1, 1, 1)
+minimizeButton.TextSize = 20
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.Parent = header
+Instance.new("UICorner", minimizeButton).CornerRadius = UDim.new(0, 7)
 
-local minimize = Instance.new("TextButton")
-minimize.Size = UDim2.fromOffset(30, 30)
-minimize.Position = UDim2.new(1, -38, 0, 10)
-minimize.BackgroundColor3 = dark
-minimize.Text = "−"
-minimize.TextColor3 = white
-minimize.TextSize = 22
-minimize.Font = Enum.Font.GothamBold
-minimize.Parent = top
-round(minimize, 8)
+local nav = Instance.new("Frame")
+nav.Name = "Navigation"
+nav.Position = UDim2.fromOffset(10, 57)
+nav.Size = UDim2.new(1, -20, 0, 36)
+nav.BackgroundTransparency = 1
+nav.Parent = root
+
+local navLayout = Instance.new("UIListLayout")
+navLayout.FillDirection = Enum.FillDirection.Horizontal
+navLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+navLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+navLayout.Padding = UDim.new(0, 6)
+navLayout.Parent = nav
 
 local content = Instance.new("Frame")
-content.Position = UDim2.fromOffset(10, 76)
-content.Size = UDim2.new(1, -20, 1, -86)
-content.BackgroundTransparency = 1
-content.Parent = main
+content.Name = "Content"
+content.Position = UDim2.fromOffset(10, 101)
+content.Size = UDim2.new(1, -20, 1, -111)
+content.BackgroundColor3 = Color3.fromRGB(22, 18, 33)
+content.BorderSizePixel = 0
+content.Parent = root
+Instance.new("UICorner", content).CornerRadius = UDim.new(0, 9)
 
-local tabBar = Instance.new("Frame")
-tabBar.Size = UDim2.new(1, 0, 0, 34)
-tabBar.BackgroundTransparency = 1
-tabBar.Parent = content
+local contentPadding = Instance.new("UIPadding")
+contentPadding.PaddingTop = UDim.new(0, 12)
+contentPadding.PaddingBottom = UDim.new(0, 10)
+contentPadding.PaddingLeft = UDim.new(0, 12)
+contentPadding.PaddingRight = UDim.new(0, 12)
+contentPadding.Parent = content
 
-local function makeTab(name, x)
-    local b = Instance.new("TextButton")
-    b.Size = UDim2.new(0.333, -4, 1, 0)
-    b.Position = UDim2.new(x, 0, 0, 0)
-    b.BackgroundColor3 = card
-    b.Text = name
-    b.TextColor3 = white
-    b.TextSize = 11
-    b.Font = Enum.Font.GothamBold
-    b.Parent = tabBar
-    round(b, 7)
-    return b
+local contentLayout = Instance.new("UIListLayout")
+contentLayout.Padding = UDim.new(0, 8)
+contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+contentLayout.Parent = content
+
+local statusLabel
+local tabButtons = {}
+local renderTab
+
+local function tween(instance, duration, properties)
+    local t = TweenService:Create(instance, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), properties)
+    t:Play()
+    return t
 end
 
-local homeTab = makeTab("INICIO", 0)
-local optionsTab = makeTab("OPCOES", 0.333)
-local infoTab = makeTab("INFO", 0.666)
+local function updateAccent()
+    accent = COLORS[accentKeys[accentIndex]]
+    rootStroke.Color = accent
+    minimizeButton.BackgroundColor3 = accent
+    for _, button in ipairs(tabButtons) do
+        if button:GetAttribute("TabName") == currentTab then
+            button.BackgroundColor3 = accent
+        end
+    end
+    if statusLabel then
+        statusLabel.TextColor3 = accent
+    end
+end
 
-local page = Instance.new("Frame")
-page.Position = UDim2.fromOffset(0, 42)
-page.Size = UDim2.new(1, 0, 1, -42)
-page.BackgroundColor3 = card
-page.BorderSizePixel = 0
-page.Parent = content
-round(page, 9)
+local function clearContent()
+    for _, child in ipairs(content:GetChildren()) do
+        if not child:IsA("UIPadding") and not child:IsA("UIListLayout") then
+            child:Destroy()
+        end
+    end
+    statusLabel = nil
+end
 
-local status = Instance.new("TextLabel")
-status.Position = UDim2.fromOffset(8, 8)
-status.Size = UDim2.new(1, -16, 0, 36)
-status.BackgroundTransparency = 1
-status.Text = "Nando Hub iniciado!"
-status.TextColor3 = white
-status.TextSize = 12
-status.Font = Enum.Font.Gotham
-status.TextWrapped = true
-status.Parent = page
+local function makeLabel(text, height)
+    local label = Instance.new("TextLabel")
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1, 0, 0, height or 28)
+    label.Font = Enum.Font.Gotham
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(230, 225, 240)
+    label.TextSize = 14
+    label.TextWrapped = true
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = content
+    return label
+end
 
-local testButton = Instance.new("TextButton")
-testButton.Position = UDim2.fromOffset(8, 48)
-testButton.Size = UDim2.new(1, -16, 0, 34)
-testButton.BackgroundColor3 = purple
-testButton.Text = "TESTAR PAINEL"
-testButton.TextColor3 = white
-testButton.TextSize = 12
-testButton.Font = Enum.Font.GothamBold
-testButton.Parent = page
-round(testButton, 8)
+local function makeButton(text, callback)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, 0, 0, 36)
+    button.BackgroundColor3 = Color3.fromRGB(43, 32, 61)
+    button.BorderSizePixel = 0
+    button.Font = Enum.Font.GothamSemibold
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 13
+    button.AutoButtonColor = true
+    button.Parent = content
+    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 7)
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = accent
+    stroke.Transparency = 0.55
+    stroke.Thickness = 1
+    stroke.Parent = button
 
-local minimized = false
+    button.Activated:Connect(function()
+        tween(button, 0.12, {BackgroundColor3 = accent})
+        task.delay(0.14, function()
+            if button.Parent then
+                tween(button, 0.18, {BackgroundColor3 = Color3.fromRGB(43, 32, 61)})
+            end
+        end)
+        if callback then callback() end
+    end)
+    return button
+end
 
-minimize.Activated:Connect(function()
-    minimized = not minimized
-    content.Visible = not minimized
-    main.Size = minimized
-        and UDim2.fromOffset(290, 68)
-        or UDim2.fromOffset(290, 250)
-    minimize.Text = minimized and "+" or "−"
-end)
+local function setStatus(message)
+    if statusLabel and statusLabel.Parent then
+        statusLabel.Text = "● " .. message
+    end
+end
 
-testButton.Activated:Connect(function()
-    status.Text = "Interface funcionando!"
-end)
+renderTab = function(tabName)
+    currentTab = tabName
+    clearContent()
 
-local function showPage(name)
-    if name == "INICIO" then
-        status.Text = "Bem-vindo ao NANDO HUB!"
-        testButton.Visible = true
-    elseif name == "OPCOES" then
-        status.Text = "Opcoes da interface"
-        testButton.Visible = false
-    else
-        status.Text = "NANDO HUB V3 | Mobile"
-        testButton.Visible = false
+    if tabName == "INICIO" then
+        makeLabel("Bem-vindo ao NANDO HUB V4!", 28)
+        makeLabel("Interface visual com efeitos neon e opções de aparência.", 42)
+        makeButton("TESTAR PAINEL", function()
+            setStatus("Painel funcionando!")
+        end)
+        statusLabel = makeLabel("● Sistema pronto", 24)
+        statusLabel.TextColor3 = accent
+    elseif tabName == "OPÇÕES" then
+        makeLabel("OPÇÕES DO PAINEL", 28)
+        makeButton("Mostrar mensagem de teste", function()
+            setStatus("Botão de teste funcionando.")
+        end)
+        statusLabel = makeLabel("● Pronto para usar", 24)
+        statusLabel.TextColor3 = accent
+    elseif tabName == "CONFIG" then
+        makeLabel("PERSONALIZAÇÃO", 24)
+        makeButton("Cor: " .. accentNames[accentIndex] .. "  •  trocar cor", function()
+            accentIndex = (accentIndex % #accentKeys) + 1
+            updateAccent()
+            renderTab("CONFIG")
+        end)
+        makeButton("Tamanho: " .. scales[scaleIndex].name .. "  •  trocar tamanho", function()
+            scaleIndex = (scaleIndex % #scales) + 1
+            root.Size = scales[scaleIndex].size
+            renderTab("CONFIG")
+        end)
+        makeButton("Reproduzir animação neon", function()
+            local original = rootScale.Scale
+            tween(rootScale, 0.18, {Scale = original + 0.05})
+            task.delay(0.2, function()
+                if rootScale.Parent then tween(rootScale, 0.22, {Scale = original}) end
+            end)
+            setStatus("Animação reproduzida!")
+        end)
+        statusLabel = makeLabel("● Configurações salvas nesta sessão", 24)
+        statusLabel.TextColor3 = accent
+    elseif tabName == "INFO" then
+        makeLabel("NANDO HUB V4", 26)
+        makeLabel("Interface demonstrativa para seu próprio jogo Roblox.", 44)
+        makeLabel("Use o Roblox Studio para adicionar funções autorizadas do seu jogo.", 48)
+        statusLabel = makeLabel("● V4 • Neon / cores / tamanho", 24)
+        statusLabel.TextColor3 = accent
     end
 
-    homeTab.BackgroundColor3 =
-        name == "INICIO" and purple or card
-    optionsTab.BackgroundColor3 =
-        name == "OPCOES" and purple or card
-    infoTab.BackgroundColor3 =
-        name == "INFO" and purple or card
+    for _, button in ipairs(tabButtons) do
+        if button:GetAttribute("TabName") == currentTab then
+            button.BackgroundColor3 = accent
+        else
+            button.BackgroundColor3 = Color3.fromRGB(43, 32, 61)
+        end
+    end
 end
 
-homeTab.Activated:Connect(function()
-    showPage("INICIO")
+local function makeTab(name)
+    local button = Instance.new("TextButton")
+    button.Name = "Tab_" .. name
+    button.Size = UDim2.new(0.25, -5, 1, 0)
+    button.BackgroundColor3 = Color3.fromRGB(43, 32, 61)
+    button.BorderSizePixel = 0
+    button.Font = Enum.Font.GothamBold
+    button.Text = name
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 11
+    button.Parent = nav
+    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 7)
+    button:SetAttribute("TabName", name)
+    table.insert(tabButtons, button)
+    button.Activated:Connect(function()
+        renderTab(name)
+    end)
+end
+
+makeTab("INICIO")
+makeTab("OPÇÕES")
+makeTab("CONFIG")
+makeTab("INFO")
+
+minimizeButton.Activated:Connect(function()
+    minimized = not minimized
+    if minimized then
+        nav.Visible = false
+        content.Visible = false
+        root.ClipsDescendants = false
+        tween(root, 0.2, {Size = UDim2.fromOffset(210, 48)})
+        minimizeButton.Text = "+"
+        title.Text = "NANDO HUB V4"
+    else
+        root.ClipsDescendants = true
+        nav.Visible = true
+        content.Visible = true
+        root.Size = scales[scaleIndex].size
+        minimizeButton.Text = "—"
+    end
 end)
 
-optionsTab.Activated:Connect(function()
-    showPage("OPCOES")
+-- Arrastar pelo cabeçalho, inclusive em telas touch.
+local dragging = false
+local dragInput
+local dragStart
+local startPosition
+
+header.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPosition = root.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
 end)
 
-infoTab.Activated:Connect(function()
-    showPage("INFO")
+header.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
 end)
 
-showPage("INICIO")
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input == dragInput or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        root.Position = UDim2.new(
+            startPosition.X.Scale, startPosition.X.Offset + delta.X,
+            startPosition.Y.Scale, startPosition.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- Brilho neon pulsante.
+task.spawn(function()
+    while gui.Parent do
+        tween(rootStroke, 0.9, {Transparency = 0.45, Thickness = 3})
+        task.wait(0.9)
+        if not gui.Parent then break end
+        tween(rootStroke, 0.9, {Transparency = 0, Thickness = 2})
+        task.wait(0.9)
+    end
+end)
+
+renderTab("INICIO")
+tween(rootScale, 0.35, {Scale = 1})
+print("NANDO HUB V4 carregado.")
