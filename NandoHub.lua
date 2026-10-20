@@ -1,639 +1,548 @@
--- NANDO HUB V5 — NEON ADVANCED
--- Para seu próprio jogo Roblox.
--- Instale como LocalScript em StarterPlayer > StarterPlayerScripts.
+
+-- NANDO HUB V6 | BBC STYLE
+-- Interface mobile para o teu próprio jogo Roblox
+-- Coloca como LocalScript em StarterPlayerScripts
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
-local oldGui = playerGui:FindFirstChild("NandoHubV5")
-if oldGui then
-    oldGui:Destroy()
-end
+local old = playerGui:FindFirstChild("NANDO_HUB_V6")
+if old then old:Destroy() end
 
-local Themes = {
-    {
-        name = "ROXO NEON",
-        main = Color3.fromRGB(164, 74, 255),
-        glow = Color3.fromRGB(232, 90, 255)
-    },
-    {
-        name = "AZUL CYBER",
-        main = Color3.fromRGB(45, 175, 255),
-        glow = Color3.fromRGB(80, 255, 255)
-    },
-    {
-        name = "ROSA NEON",
-        main = Color3.fromRGB(255, 65, 190),
-        glow = Color3.fromRGB(255, 130, 230)
-    },
-    {
-        name = "VERDE MATRIX",
-        main = Color3.fromRGB(55, 255, 155),
-        glow = Color3.fromRGB(160, 255, 200)
-    },
+local C = {
+    BG = Color3.fromRGB(7, 7, 9),
+    PANEL = Color3.fromRGB(16, 16, 19),
+    ROW = Color3.fromRGB(23, 23, 26),
+    ORANGE = Color3.fromRGB(255, 145, 0),
+    WHITE = Color3.fromRGB(245, 245, 245),
+    GREY = Color3.fromRGB(135, 135, 140),
+    GREEN = Color3.fromRGB(65, 220, 130),
 }
 
-local themeIndex = 1
-local sizeIndex = 2
-
-local sizes = {
-    {name = "PEQUENO", size = UDim2.fromOffset(320, 250)},
-    {name = "MÉDIO", size = UDim2.fromOffset(380, 290)},
-    {name = "GRANDE", size = UDim2.fromOffset(440, 330)},
+local settings = {
+    ["FOV Visual"] = true,
+    ["Mostrar FPS"] = true,
+    ["Mostrar Ping"] = true,
+    ["Tema RGB"] = false,
+    ["Zoom Visual"] = false,
+    ["Nomes de teste"] = false,
+    ["Animações"] = true,
+    ["Som dos botões"] = false,
 }
-
-local theme = Themes[themeIndex]
-local minimized = false
-local activeTab = "INICIO"
-local pulseEnabled = true
-local uiTransparency = 0
-local statusText = "Sistema pronto"
-
-local function tween(obj, duration, props, style)
-    local info = TweenInfo.new(
-        duration,
-        style or Enum.EasingStyle.Quad,
-        Enum.EasingDirection.Out
-    )
-
-    local tw = TweenService:Create(obj, info, props)
-    tw:Play()
-    return tw
-end
 
 local gui = Instance.new("ScreenGui")
-gui.Name = "NandoHubV5"
+gui.Name = "NANDO_HUB_V6"
 gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.DisplayOrder = 100
 gui.Parent = playerGui
 
-local root = Instance.new("Frame")
-root.Name = "MainPanel"
-root.AnchorPoint = Vector2.new(0.5, 0.5)
-root.Position = UDim2.fromScale(0.5, 0.5)
-root.Size = sizes[sizeIndex].size
-root.BackgroundColor3 = Color3.fromRGB(13, 12, 23)
-root.BorderSizePixel = 0
-root.ClipsDescendants = true
-root.Parent = gui
-
-Instance.new("UICorner", root).CornerRadius =
-    UDim.new(0, 15)
-
-local rootScale = Instance.new("UIScale")
-rootScale.Scale = 0.86
-rootScale.Parent = root
-
-local rootStroke = Instance.new("UIStroke")
-rootStroke.Name = "NeonBorder"
-rootStroke.Thickness = 2
-rootStroke.Color = theme.main
-rootStroke.Transparency = 0.05
-rootStroke.Parent = root
-
-local header = Instance.new("Frame")
-header.Name = "Header"
-header.Size = UDim2.new(1, 0, 0, 54)
-header.BackgroundColor3 = Color3.fromRGB(25, 18, 42)
-header.BorderSizePixel = 0
-header.Parent = root
-
-Instance.new("UICorner", header).CornerRadius =
-    UDim.new(0, 15)
-
-local headerCover = Instance.new("Frame")
-headerCover.Position = UDim2.new(0, 0, 1, -14)
-headerCover.Size = UDim2.new(1, 0, 0, 14)
-headerCover.BackgroundColor3 = header.BackgroundColor3
-headerCover.BorderSizePixel = 0
-headerCover.Parent = header
-
-local accentLine = Instance.new("Frame")
-accentLine.Name = "AccentLine"
-accentLine.Position = UDim2.new(0, 0, 1, -2)
-accentLine.Size = UDim2.new(1, 0, 0, 2)
-accentLine.BackgroundColor3 = theme.main
-accentLine.BorderSizePixel = 0
-accentLine.Parent = header
-
-local title = Instance.new("TextLabel")
-title.BackgroundTransparency = 1
-title.Position = UDim2.fromOffset(15, 4)
-title.Size = UDim2.new(1, -110, 0, 27)
-title.Font = Enum.Font.GothamBlack
-title.Text = "NANDO HUB"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.TextSize = 18
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = header
-
-local subtitle = Instance.new("TextLabel")
-subtitle.BackgroundTransparency = 1
-subtitle.Position = UDim2.fromOffset(16, 29)
-subtitle.Size = UDim2.new(1, -115, 0, 16)
-subtitle.Font = Enum.Font.GothamMedium
-subtitle.Text = "V5  •  NEON ADVANCED"
-subtitle.TextColor3 = theme.glow
-subtitle.TextSize = 9
-subtitle.TextXAlignment = Enum.TextXAlignment.Left
-subtitle.Parent = header
-
-local minimize = Instance.new("TextButton")
-minimize.Name = "MinimizeButton"
-minimize.Size = UDim2.fromOffset(34, 32)
-minimize.Position = UDim2.new(1, -44, 0, 11)
-minimize.BackgroundColor3 = theme.main
-minimize.BorderSizePixel = 0
-minimize.Text = "—"
-minimize.TextColor3 = Color3.new(1, 1, 1)
-minimize.TextSize = 20
-minimize.Font = Enum.Font.GothamBlack
-minimize.Parent = header
-
-Instance.new("UICorner", minimize).CornerRadius =
-    UDim.new(0, 8)
-
-local nav = Instance.new("Frame")
-nav.Name = "Navigation"
-nav.Position = UDim2.fromOffset(10, 64)
-nav.Size = UDim2.new(1, -20, 0, 34)
-nav.BackgroundTransparency = 1
-nav.Parent = root
-
-local navLayout = Instance.new("UIListLayout")
-navLayout.FillDirection = Enum.FillDirection.Horizontal
-navLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-navLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-navLayout.Padding = UDim.new(0, 5)
-navLayout.Parent = nav
-
-local content = Instance.new("ScrollingFrame")
-content.Name = "Content"
-content.Position = UDim2.fromOffset(10, 106)
-content.Size = UDim2.new(1, -20, 1, -116)
-content.BackgroundColor3 = Color3.fromRGB(20, 17, 32)
-content.BorderSizePixel = 0
-content.ScrollBarThickness = 3
-content.ScrollBarImageColor3 = theme.main
-content.CanvasSize = UDim2.new(0, 0, 0, 0)
-content.AutomaticCanvasSize = Enum.AutomaticSize.Y
-content.ScrollingDirection = Enum.ScrollingDirection.Y
-content.Parent = root
-
-Instance.new("UICorner", content).CornerRadius =
-    UDim.new(0, 10)
-
-local contentPadding = Instance.new("UIPadding")
-contentPadding.PaddingTop = UDim.new(0, 12)
-contentPadding.PaddingBottom = UDim.new(0, 12)
-contentPadding.PaddingLeft = UDim.new(0, 12)
-contentPadding.PaddingRight = UDim.new(0, 12)
-contentPadding.Parent = content
-
-local contentLayout = Instance.new("UIListLayout")
-contentLayout.Padding = UDim.new(0, 8)
-contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-contentLayout.Parent = content
-
-local tabButtons = {}
-local statusLabel
-
-local function applyTheme()
-    theme = Themes[themeIndex]
-
-    rootStroke.Color = theme.main
-    accentLine.BackgroundColor3 = theme.main
-    minimize.BackgroundColor3 = theme.main
-    subtitle.TextColor3 = theme.glow
-    content.ScrollBarImageColor3 = theme.main
-
-    for _, button in ipairs(tabButtons) do
-        if button:GetAttribute("TabName") == activeTab then
-            button.BackgroundColor3 = theme.main
-        else
-            button.BackgroundColor3 =
-                Color3.fromRGB(42, 32, 61)
-        end
-    end
-
-    for _, item in ipairs(content:GetChildren()) do
-        if item:IsA("TextButton") then
-            local stroke = item:FindFirstChildOfClass("UIStroke")
-            if stroke then
-                stroke.Color = theme.main
-            end
-        elseif item:IsA("TextLabel")
-            and item.Name == "StatusLabel" then
-            item.TextColor3 = theme.glow
-        end
-    end
+local function make(class, props, parent)
+    local obj = Instance.new(class)
+    for k, v in pairs(props) do obj[k] = v end
+    obj.Parent = parent
+    return obj
 end
 
-local function setStatus(text)
-    statusText = text
-
-    if statusLabel and statusLabel.Parent then
-        statusLabel.Text = "●  " .. statusText
-    end
+local function round(obj, radius)
+    make("UICorner", {
+        CornerRadius = UDim.new(0, radius)
+    }, obj)
 end
+
+local function outline(obj, color, thickness)
+    return make("UIStroke", {
+        Color = color or C.ORANGE,
+        Thickness = thickness or 1
+    }, obj)
+end
+
+-- Botão flutuante
+local opener = make("TextButton", {
+    Name = "OpenNando",
+    Size = UDim2.fromOffset(58, 58),
+    Position = UDim2.new(0, 12, 0.4, 0),
+    BackgroundColor3 = C.BG,
+    Text = "N",
+    TextColor3 = C.ORANGE,
+    TextSize = 28,
+    Font = Enum.Font.GothamBlack,
+    Active = true,
+}, gui)
+round(opener, 29)
+outline(opener, C.ORANGE, 2)
+
+-- Painel principal
+local panel = make("Frame", {
+    Name = "Main",
+    Size = UDim2.new(0.94, 0, 0.78, 0),
+    Position = UDim2.new(0.03, 0, 0.11, 0),
+    BackgroundColor3 = C.BG,
+    Visible = true,
+    Active = true,
+    ClipsDescendants = true,
+}, gui)
+round(panel, 9)
+local border = outline(panel, C.ORANGE, 1.5)
+
+make("UISizeConstraint", {
+    MinSize = Vector2.new(300, 340),
+    MaxSize = Vector2.new(760, 620),
+}, panel)
+
+opener.Activated:Connect(function()
+    panel.Visible = not panel.Visible
+end)
+
+-- Arrastar o painel pelo cabeçalho
+local header = make("Frame", {
+    Size = UDim2.new(1, 0, 0, 58),
+    BackgroundColor3 = C.BG,
+    Active = true,
+}, panel)
+
+local dragging = false
+local dragStart, initialPos
+
+header.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        initialPos = panel.Position
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if dragging and (
+        input.UserInputType == Enum.UserInputType.Touch
+        or input.UserInputType == Enum.UserInputType.MouseMovement
+    ) then
+        local delta = input.Position - dragStart
+        panel.Position = UDim2.new(
+            initialPos.X.Scale,
+            initialPos.X.Offset + delta.X,
+            initialPos.Y.Scale,
+            initialPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+make("TextLabel", {
+    Size = UDim2.new(0, 190, 1, 0),
+    Position = UDim2.fromOffset(14, 0),
+    BackgroundTransparency = 1,
+    Text = "NANDO HUB",
+    TextColor3 = C.WHITE,
+    TextSize = 23,
+    Font = Enum.Font.GothamMedium,
+    TextXAlignment = Enum.TextXAlignment.Left,
+}, header)
+
+local v6 = make("TextLabel", {
+    Size = UDim2.fromOffset(36, 32),
+    Position = UDim2.fromOffset(166, 13),
+    BackgroundColor3 = C.ORANGE,
+    Text = "V6",
+    TextColor3 = C.BG,
+    TextSize = 15,
+    Font = Enum.Font.GothamBlack,
+}, header)
+round(v6, 7)
+
+local close = make("TextButton", {
+    Size = UDim2.fromOffset(42, 42),
+    Position = UDim2.new(1, -47, 0, 7),
+    BackgroundColor3 = C.ROW,
+    Text = "×",
+    TextColor3 = C.WHITE,
+    TextSize = 28,
+}, header)
+round(close, 7)
+close.Activated:Connect(function()
+    panel.Visible = false
+end)
+
+-- Barra lateral
+local sidebar = make("Frame", {
+    Size = UDim2.new(0, 116, 1, -64),
+    Position = UDim2.fromOffset(0, 58),
+    BackgroundColor3 = C.BG,
+}, panel)
+
+make("UIListLayout", {
+    Padding = UDim.new(0, 5),
+    SortOrder = Enum.SortOrder.LayoutOrder,
+}, sidebar)
+
+make("UIPadding", {
+    PaddingTop = UDim.new(0, 9),
+    PaddingLeft = UDim.new(0, 7),
+    PaddingRight = UDim.new(0, 5),
+}, sidebar)
+
+-- Conteúdo da aba
+local content = make("ScrollingFrame", {
+    Name = "TabContent",
+    Size = UDim2.new(1, -125, 1, -68),
+    Position = UDim2.new(0, 120, 0, 62),
+    BackgroundColor3 = C.BG,
+    BorderSizePixel = 0,
+    ScrollBarThickness = 3,
+    ScrollBarImageColor3 = C.ORANGE,
+    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+    CanvasSize = UDim2.new(),
+}, panel)
+
+make("UIPadding", {
+    PaddingTop = UDim.new(0, 6),
+    PaddingLeft = UDim.new(0, 5),
+    PaddingRight = UDim.new(0, 5),
+    PaddingBottom = UDim.new(0, 10),
+}, content)
+
+make("UIListLayout", {
+    Padding = UDim.new(0, 6),
+    SortOrder = Enum.SortOrder.LayoutOrder,
+}, content)
 
 local function clearContent()
     for _, child in ipairs(content:GetChildren()) do
-        if child ~= contentPadding
-            and child ~= contentLayout then
+        if child:IsA("GuiObject")
+            and not child:IsA("UIListLayout")
+            and not child:IsA("UIPadding") then
             child:Destroy()
         end
     end
-
-    statusLabel = nil
 end
 
-local function makeLabel(text, height, isHeading)
-    local label = Instance.new("TextLabel")
-    label.BackgroundTransparency = 1
-    label.Size = UDim2.new(1, 0, 0, height or 28)
-    label.Font = isHeading and
-        Enum.Font.GothamBold or Enum.Font.Gotham
-    label.Text = text
-    label.TextColor3 = isHeading and theme.glow
-        or Color3.fromRGB(224, 220, 237)
-    label.TextSize = isHeading and 15 or 13
-    label.TextWrapped = true
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = content
+local function section(text)
+    local label = make("TextLabel", {
+        Size = UDim2.new(1, -5, 0, 31),
+        BackgroundTransparency = 1,
+        Text = text:upper(),
+        TextColor3 = C.GREY,
+        TextSize = 13,
+        Font = Enum.Font.GothamMedium,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    }, content)
+
+    make("Frame", {
+        Size = UDim2.new(1, -5, 0, 1),
+        BackgroundColor3 = C.ROW,
+        BorderSizePixel = 0,
+    }, content)
 
     return label
 end
 
-local function makeButton(text, callback)
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, 0, 0, 36)
-    button.BackgroundColor3 = Color3.fromRGB(42, 32, 61)
-    button.BorderSizePixel = 0
-    button.Font = Enum.Font.GothamSemibold
-    button.Text = text
-    button.TextColor3 = Color3.fromRGB(248, 246, 255)
-    button.TextSize = 12
-    button.TextWrapped = true
-    button.AutoButtonColor = false
-    button.Parent = content
+local function toggle(label, key, callback)
+    local row = make("Frame", {
+        Size = UDim2.new(1, -5, 0, 43),
+        BackgroundColor3 = C.BG,
+    }, content)
 
-    Instance.new("UICorner", button).CornerRadius =
-        UDim.new(0, 8)
+    local text = make("TextLabel", {
+        Size = UDim2.new(1, -72, 1, 0),
+        Position = UDim2.fromOffset(8, 0),
+        BackgroundTransparency = 1,
+        Text = label,
+        TextColor3 = C.WHITE,
+        TextSize = 12,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    }, row)
 
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = theme.main
-    stroke.Thickness = 1
-    stroke.Transparency = 0.48
-    stroke.Parent = button
+    local button = make("TextButton", {
+        Size = UDim2.fromOffset(43, 23),
+        Position = UDim2.new(1, -51, 0.5, -11),
+        BackgroundColor3 = settings[key] and C.ORANGE or C.ROW,
+        Text = "",
+        AutoButtonColor = false,
+    }, row)
+    round(button, 15)
 
-    button.MouseEnter:Connect(function()
-        tween(button, 0.15, {
-            BackgroundColor3 = Color3.fromRGB(58, 40, 82)
-        })
-
-        tween(stroke, 0.15, {
-            Transparency = 0.05,
-            Thickness = 1.5
-        })
-    end)
-
-    button.MouseLeave:Connect(function()
-        tween(button, 0.15, {
-            BackgroundColor3 = Color3.fromRGB(42, 32, 61)
-        })
-
-        tween(stroke, 0.15, {
-            Transparency = 0.48,
-            Thickness = 1
-        })
-    end)
+    local knob = make("Frame", {
+        Size = UDim2.fromOffset(17, 17),
+        Position = settings[key]
+            and UDim2.new(1, -20, 0.5, -8)
+            or UDim2.new(0, 3, 0.5, -8),
+        BackgroundColor3 = C.WHITE,
+    }, button)
+    round(knob, 12)
 
     button.Activated:Connect(function()
-        tween(button, 0.08, {
-            BackgroundColor3 = theme.main
-        })
+        settings[key] = not settings[key]
 
-        task.delay(0.12, function()
-            if button.Parent then
-                tween(button, 0.16, {
-                    BackgroundColor3 = Color3.fromRGB(42, 32, 61)
-                })
-            end
-        end)
+        local enabled = settings[key]
+        TweenService:Create(button, TweenInfo.new(0.15), {
+            BackgroundColor3 = enabled and C.ORANGE or C.ROW
+        }):Play()
 
-        if callback then
-            callback()
+        TweenService:Create(knob, TweenInfo.new(0.15), {
+            Position = enabled
+                and UDim2.new(1, -20, 0.5, -8)
+                or UDim2.new(0, 3, 0.5, -8)
+        }):Play()
+
+        if callback then callback(enabled) end
+    end)
+
+    return row
+end
+
+local function slider(label, min, max, initial, callback)
+    local row = make("Frame", {
+        Size = UDim2.new(1, -5, 0, 67),
+        BackgroundColor3 = C.BG,
+    }, content)
+
+    local value = initial
+    local title = make("TextLabel", {
+        Size = UDim2.new(1, -10, 0, 28),
+        Position = UDim2.fromOffset(5, 0),
+        BackgroundTransparency = 1,
+        Text = label .. "     " .. tostring(value),
+        TextColor3 = C.WHITE,
+        TextSize = 12,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    }, row)
+
+    local bar = make("TextButton", {
+        Size = UDim2.new(1, -18, 0, 8),
+        Position = UDim2.fromOffset(9, 43),
+        BackgroundColor3 = C.ROW,
+        Text = "",
+        AutoButtonColor = false,
+    }, row)
+    round(bar, 5)
+
+    local fill = make("Frame", {
+        Size = UDim2.new((value - min) / (max - min), 0, 1, 0),
+        BackgroundColor3 = C.ORANGE,
+    }, bar)
+    round(fill, 5)
+
+    local dot = make("Frame", {
+        Size = UDim2.fromOffset(16, 16),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new((value - min) / (max - min), 0, 0.5, 0),
+        BackgroundColor3 = C.BG,
+    }, bar)
+    round(dot, 10)
+    outline(dot, C.ORANGE, 3)
+
+    local function update(input)
+        local ratio = math.clamp(
+            (input.Position.X - bar.AbsolutePosition.X)
+                / bar.AbsoluteSize.X, 0, 1
+        )
+        value = math.floor(min + (max - min) * ratio)
+        fill.Size = UDim2.new(ratio, 0, 1, 0)
+        dot.Position = UDim2.new(ratio, 0, 0.5, 0)
+        title.Text = label .. "     " .. tostring(value)
+        if callback then callback(value) end
+    end
+
+    bar.Activated:Connect(function()
+        title.Text = label .. "     " .. tostring(value)
+    end)
+
+    bar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch
+            or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            update(input)
         end
     end)
 
-    return button
+    UIS.InputChanged:Connect(function(input)
+        if UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
+            and input.UserInputType == Enum.UserInputType.MouseMovement then
+            -- O arrasto do slider é ativado ao tocar na barra.
+        end
+    end)
+
+    return row
 end
 
+local tabs = {
+    {name = "VISUALS", icon = "◉"},
+    {name = "PLAYER", icon = "♟"},
+    {name = "CAMERA", icon = "◎"},
+    {name = "WORLD", icon = "◇"},
+    {name = "MISC", icon = "⚙"},
+    {name = "CONFIG", icon = "▤"},
+}
+
+local selectedTab = "PLAYER"
 local renderTab
 
-renderTab = function(tabName)
-    activeTab = tabName
-    clearContent()
+for _, tabData in ipairs(tabs) do
+    local tab = make("TextButton", {
+        Size = UDim2.new(1, -2, 0, 42),
+        BackgroundColor3 = tabData.name == selectedTab
+            and Color3.fromRGB(75, 43, 8) or C.BG,
+        Text = tabData.icon .. " " .. tabData.name,
+        TextColor3 = tabData.name == selectedTab and C.WHITE or C.GREY,
+        TextSize = 10,
+        Font = Enum.Font.GothamMedium,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        AutoButtonColor = false,
+    }, sidebar)
+    round(tab, 5)
 
-    if tabName == "INICIO" then
-        makeLabel("BEM-VINDO AO V5", 24, true)
+    tab.Activated:Connect(function()
+        selectedTab = tabData.name
 
-        makeLabel(
-            "Visual cyberpunk, bordas neon e controles rápidos.",
-            38
-        )
-
-        makeButton("TESTAR ANIMAÇÃO", function()
-            tween(rootScale, 0.12, {
-                Scale = 1.035
-            }, Enum.EasingStyle.Back)
-
-            task.delay(0.15, function()
-                if rootScale.Parent then
-                    tween(rootScale, 0.22, {
-                        Scale = 1
-                    })
-                end
-            end)
-
-            setStatus("Animação funcionando!")
-        end)
-
-        makeButton("TESTAR NOTIFICAÇÃO", function()
-            setStatus(
-                "Tudo certo! NANDO HUB V5 está ativo."
-            )
-        end)
-
-        statusLabel = makeLabel(
-            "●  " .. statusText, 24
-        )
-        statusLabel.Name = "StatusLabel"
-        statusLabel.TextColor3 = theme.glow
-
-    elseif tabName == "OPÇÕES" then
-        makeLabel("ATALHOS VISUAIS", 24, true)
-
-        makeButton(
-            "Efeito de brilho: "
-                .. (pulseEnabled and "LIGADO" or "DESLIGADO"),
-            function()
-                pulseEnabled = not pulseEnabled
-                setStatus(
-                    "Efeito de brilho "
-                    .. (pulseEnabled and "ligado." or "desligado.")
-                )
-                renderTab("OPÇÕES")
+        for _, sibling in ipairs(sidebar:GetChildren()) do
+            if sibling:IsA("TextButton") then
+                local active = sibling == tab
+                sibling.BackgroundColor3 = active
+                    and Color3.fromRGB(75, 43, 8) or C.BG
+                sibling.TextColor3 = active and C.WHITE or C.GREY
             end
-        )
+        end
 
-        makeButton("Centralizar painel", function()
-            root.Position = UDim2.fromScale(0.5, 0.5)
-            setStatus("Painel centralizado.")
-        end)
-
-        makeButton("Restaurar aparência padrão", function()
-            themeIndex = 1
-            sizeIndex = 2
-            uiTransparency = 0
-            root.Size = sizes[sizeIndex].size
-            root.BackgroundTransparency = uiTransparency
-            applyTheme()
-            setStatus("Aparência padrão restaurada.")
-            renderTab("OPÇÕES")
-        end)
-
-        statusLabel = makeLabel(
-            "●  " .. statusText, 24
-        )
-        statusLabel.Name = "StatusLabel"
-        statusLabel.TextColor3 = theme.glow
-
-    elseif tabName == "CONFIG" then
-        makeLabel("APARÊNCIA DO PAINEL", 24, true)
-
-        makeButton(
-            "Tema: " .. theme.name .. "  •  trocar",
-            function()
-                themeIndex = (themeIndex % #Themes) + 1
-                applyTheme()
-                renderTab("CONFIG")
-            end
-        )
-
-        makeButton(
-            "Tamanho: " .. sizes[sizeIndex].name
-                .. "  •  trocar",
-            function()
-                sizeIndex = (sizeIndex % #sizes) + 1
-                root.Size = sizes[sizeIndex].size
-                renderTab("CONFIG")
-            end
-        )
-
-        makeButton(
-            "Transparência: "
-                .. tostring(math.floor(uiTransparency * 100))
-                .. "%  •  trocar",
-            function()
-                local levels = {0, 0.08, 0.16, 0.24}
-                local nextIndex = 1
-
-                for i, level in ipairs(levels) do
-                    if math.abs(level - uiTransparency) < 0.001 then
-                        nextIndex = (i % #levels) + 1
-                        break
-                    end
-                end
-
-                uiTransparency = levels[nextIndex]
-
-                tween(root, 0.18, {
-                    BackgroundTransparency = uiTransparency
-                })
-
-                setStatus("Transparência atualizada.")
-                renderTab("CONFIG")
-            end
-        )
-
-        makeLabel(
-            "As preferências ficam ativas durante esta sessão.",
-            34
-        )
-
-        statusLabel = makeLabel(
-            "●  " .. statusText, 24
-        )
-        statusLabel.Name = "StatusLabel"
-        statusLabel.TextColor3 = theme.glow
-
-    elseif tabName == "INFO" then
-        makeLabel("NANDO HUB V5", 24, true)
-
-        makeLabel(
-            "Versão visual com neon avançado, temas, tamanho "
-                .. "ajustável, transparência, painel arrastável "
-                .. "e minimizar/restaurar.",
-            76
-        )
-
-        makeLabel(
-            "Este painel é uma base visual para funções "
-                .. "autorizadas do seu próprio jogo.",
-            54
-        )
-
-        statusLabel = makeLabel(
-            "●  " .. statusText, 24
-        )
-        statusLabel.Name = "StatusLabel"
-        statusLabel.TextColor3 = theme.glow
-    end
-
-    applyTheme()
-end
-
-local function makeTab(name, width)
-    local button = Instance.new("TextButton")
-    button.Name = "Tab_" .. name
-    button.Size = UDim2.new(width, -4, 1, 0)
-    button.BackgroundColor3 = Color3.fromRGB(42, 32, 61)
-    button.BorderSizePixel = 0
-    button.Font = Enum.Font.GothamBold
-    button.Text = name
-    button.TextColor3 = Color3.new(1, 1, 1)
-    button.TextSize = 10
-    button.Parent = nav
-
-    Instance.new("UICorner", button).CornerRadius =
-        UDim.new(0, 7)
-
-    button:SetAttribute("TabName", name)
-    table.insert(tabButtons, button)
-
-    button.Activated:Connect(function()
-        renderTab(name)
+        renderTab(selectedTab)
     end)
 end
 
-makeTab("INICIO", 0.25)
-makeTab("OPÇÕES", 0.25)
-makeTab("CONFIG", 0.25)
-makeTab("INFO", 0.25)
+renderTab = function(name)
+    clearContent()
 
-minimize.Activated:Connect(function()
-    minimized = not minimized
+    if name == "VISUALS" then
+        section("Visual Settings")
+        toggle("FOV Circle (visual)", "FOV Visual")
+        toggle("Show FPS", "Mostrar FPS")
+        toggle("Show Ping", "Mostrar Ping")
+        toggle("RGB Theme", "Tema RGB")
+        toggle("Show Test Names", "Nomes de teste")
 
-    if minimized then
-        nav.Visible = false
-        content.Visible = false
-        root.ClipsDescendants = false
+    elseif name == "PLAYER" then
+        section("Player Settings")
+        toggle("Visual Zoom", "Zoom Visual")
+        section("Movement")
+        make("TextLabel", {
+            Size = UDim2.new(1, -5, 0, 42),
+            BackgroundTransparency = 1,
+            Text = "Personaliza controles do teu próprio jogo.",
+            TextColor3 = C.GREY,
+            TextSize = 12,
+            TextWrapped = true,
+        }, content)
 
-        tween(root, 0.2, {
-            Size = UDim2.fromOffset(215, 54)
-        })
+    elseif name == "CAMERA" then
+        section("Field Of View")
+        slider("FOV Visual", 40, 120, 75)
+        slider("Zoom Visual", 1, 10, 5)
+        section("Camera")
+        make("TextLabel", {
+            Size = UDim2.new(1, -5, 0, 40),
+            BackgroundTransparency = 1,
+            Text = "Estes sliders são demonstrativos.",
+            TextColor3 = C.GREY,
+            TextSize = 12,
+        }, content)
 
-        minimize.Text = "+"
-    else
-        root.ClipsDescendants = true
-        nav.Visible = true
-        content.Visible = true
-        root.Size = sizes[sizeIndex].size
-        minimize.Text = "—"
-    end
-end)
+    elseif name == "WORLD" then
+        section("World")
+        make("TextLabel", {
+            Size = UDim2.new(1, -5, 0, 55),
+            BackgroundTransparency = 1,
+            Text = "Espaço para marcadores e recursos do teu próprio jogo.",
+            TextColor3 = C.GREY,
+            TextWrapped = true,
+            TextSize = 12,
+        }, content)
 
--- Arrastar pelo cabeçalho com mouse ou toque.
-local dragging = false
-local dragStart
-local startPosition
-local activeDragInput
+    elseif name == "MISC" then
+        section("Miscellaneous")
+        toggle("Animations", "Animações")
+        toggle("Button Sounds", "Som dos botões")
 
-header.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1
-        or input.UserInputType == Enum.UserInputType.Touch then
+    elseif name == "CONFIG" then
+        section("Configuration")
+        local save = make("TextButton", {
+            Size = UDim2.new(1, -5, 0, 42),
+            BackgroundColor3 = C.ROW,
+            Text = "SAVE SETTINGS",
+            TextColor3 = C.ORANGE,
+            TextSize = 13,
+            Font = Enum.Font.GothamBold,
+        }, content)
+        round(save, 6)
 
-        dragging = true
-        dragStart = input.Position
-        startPosition = root.Position
-        activeDragInput = input
+        local info = make("TextLabel", {
+            Size = UDim2.new(1, -5, 0, 45),
+            BackgroundTransparency = 1,
+            Text = "As configurações ficam na memória desta sessão.",
+            TextColor3 = C.GREY,
+            TextSize = 11,
+            TextWrapped = true,
+        }, content)
 
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
+        save.Activated:Connect(function()
+            _G.NANDO_HUB_V6_SETTINGS = table.clone(settings)
+            info.Text = "Configurações copiadas para a memória!"
+            info.TextColor3 = C.GREEN
         end)
     end
-end)
+end
 
-UserInputService.InputChanged:Connect(function(input)
-    if dragging then
-        local isMouseMove =
-            input.UserInputType == Enum.UserInputType.MouseMovement
+renderTab(selectedTab)
 
-        local isTouchMove =
-            input.UserInputType == Enum.UserInputType.Touch
-            and activeDragInput == input
+-- Indicadores de FPS
+local status = make("TextLabel", {
+    Size = UDim2.new(0, 150, 0, 25),
+    Position = UDim2.new(1, -158, 0, 5),
+    BackgroundColor3 = C.BG,
+    BackgroundTransparency = 0.15,
+    TextColor3 = C.ORANGE,
+    TextSize = 11,
+    Font = Enum.Font.GothamBold,
+    Text = "NANDO V6",
+}, gui)
+round(status, 5)
 
-        if isMouseMove or isTouchMove then
-            local delta = input.Position - dragStart
+local frames, elapsed, fps = 0, 0, 0
 
-            root.Position = UDim2.new(
-                startPosition.X.Scale,
-                startPosition.X.Offset + delta.X,
-                startPosition.Y.Scale,
-                startPosition.Y.Offset + delta.Y
-            )
-        end
-    end
-end)
+RunService.RenderStepped:Connect(function(dt)
+    frames += 1
+    elapsed += dt
 
--- Pulso neon contínuo; pode ser desligado na aba OPÇÕES.
-task.spawn(function()
-    while gui.Parent do
-        if pulseEnabled then
-            tween(rootStroke, 0.85, {
-                Transparency = 0.35,
-                Thickness = 3
-            })
+    if elapsed >= 1 then
+        fps = math.floor(frames / elapsed)
+        frames, elapsed = 0, 0
 
-            tween(accentLine, 0.85, {
-                BackgroundTransparency = 0.2
-            })
-
-            task.wait(0.85)
-
-            if not gui.Parent then
-                break
-            end
-
-            tween(rootStroke, 0.85, {
-                Transparency = 0.02,
-                Thickness = 2
-            })
-
-            tween(accentLine, 0.85, {
-                BackgroundTransparency = 0
-            })
-
-            task.wait(0.85)
+        if settings["Mostrar FPS"] then
+            status.Text = "NANDO V6 | FPS: " .. fps
         else
-            task.wait(0.25)
+            status.Text = "NANDO HUB V6"
         end
+    end
+
+    if settings["Tema RGB"] then
+        local color = Color3.fromHSV((os.clock() * 0.15) % 1, 1, 1)
+        border.Color = color
+        opener.TextColor3 = color
+        v6.BackgroundColor3 = color
+    else
+        border.Color = C.ORANGE
+        opener.TextColor3 = C.ORANGE
+        v6.BackgroundColor3 = C.ORANGE
     end
 end)
 
-renderTab("INICIO")
-
-tween(rootScale, 0.38, {
-    Scale = 1
-}, Enum.EasingStyle.Back)
-
-print("NANDO HUB V5 carregado com sucesso.")
+print("NANDO HUB V6 carregado!")
